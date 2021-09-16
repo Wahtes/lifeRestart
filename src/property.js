@@ -11,6 +11,7 @@ class Property {
         STR: "STR", // 体质 strength STR
         MNY: "MNY", // 家境 money MNY
         SPR: "SPR", // 快乐 spirit SPR
+        /////////////////////
         LIF: "LIF", // 生命 life LIFE
         TLT: "TLT", // 天赋 talent TLT
         EVT: "EVT", // 事件 event EVT
@@ -48,18 +49,18 @@ class Property {
 
     #ageData;
     #data = {};
-
+    //初始化age数据（来自json）
     initial({age}) {
 
         this.#ageData = age;
-        for(const a in age) {
-            let { event, talent } = age[a];
+        for(const a in age) { //age对应的事件
+            let { event, talent } = age[a];  //真的有talent吗
             if(!Array.isArray(event))
                 event = event?.split(',') || [];
 
             event = event.map(v=>{
-                const value = `${v}`.split('*').map(n=>Number(n));
-                if(value.length==1) value.push(1);
+                const value = `${v}`.split('*').map(n=>Number(n)); //important，解析*后的概率数据
+                if(value.length==1) value.push(1);  //没有*就按1算
                 return value;
             });
 
@@ -71,7 +72,7 @@ class Property {
             age[a] = { event, talent };
         }
     }
-
+    // 初始化（TODO 要搞清顺序）
     restart(data) {
         this.#data = {
             [this.TYPES.AGE]: -1,
@@ -104,7 +105,7 @@ class Property {
         for(const key in data)
             this.change(key, data[key]);
     }
-
+    // 开启重生的最后一步？初始化最大最小值都为起始值
     restartLastStep() {
         this.#data[this.TYPES.LAGE] = this.get(this.TYPES.AGE);
         this.#data[this.TYPES.LCHR] = this.get(this.TYPES.CHR);
@@ -159,7 +160,7 @@ class Property {
                 const HSTR = this.get(this.TYPES.HSTR);
                 const HMNY = this.get(this.TYPES.HMNY);
                 const HSPR = this.get(this.TYPES.HSPR);
-                return Math.floor(sum(HCHR, HINT, HSTR, HMNY, HSPR)*2 + HAGE/2);
+                return Math.floor(sum(HCHR, HINT, HSTR, HMNY, HSPR)*2 + HAGE/2); //总分计算公式！
             case this.TYPES.TMS:
                 return this.lsget('times') || 0;
             case this.TYPES.EXT:
@@ -177,7 +178,7 @@ class Property {
             default: return 0;
         }
     }
-
+    //由一项属性的最大/最小值类型，获得其当前值类型
     fallback(prop) {
         switch(prop) {
             case this.TYPES.LAGE:
@@ -198,7 +199,7 @@ class Property {
             default: return;
         }
     }
-
+    //setters
     set(prop, value) {
         switch(prop) {
             case this.TYPES.AGE:
@@ -233,7 +234,7 @@ class Property {
             [this.TYPES.SPR]: this.get(this.TYPES.SPR),
         });
     }
-
+    // 将属性prop增加value
     change(prop, value) {
         if(Array.isArray(value)) {
             for(const v of value)
@@ -255,7 +256,7 @@ class Property {
                 const v = this.#data[prop];
                 if(value<0) {
                     const index = v.indexOf(value);
-                    if(index!=-1) v.splice(index,1);
+                    if(index!=-1) v.splice(index,1); //在index处删去value
                 }
                 if(!v.includes(value)) v.push(value);
                 this.achieve(prop, value);
@@ -270,6 +271,7 @@ class Property {
         }
     }
 
+    //天赋或事件对数值系统产生效果
     effect(effects) {
         for(const prop in effects)
             this.change(prop, Number(effects[prop]));
@@ -278,7 +280,7 @@ class Property {
     isEnd() {
         return this.get(this.TYPES.LIF) < 1;
     }
-
+    // 进入下一岁，返回对应的年龄，事件集合，天赋（？）
     ageNext() {
         this.change(this.TYPES.AGE, 1);
         const age = this.get(this.TYPES.AGE);
@@ -289,7 +291,7 @@ class Property {
     getAgeData(age) {
         return clone(this.#ageData[age]);
     }
-
+    // 对属性prop加入新值value后，更新该属性最大值和最小值
     hl(prop, value) {
         let keys;
         switch(prop) {

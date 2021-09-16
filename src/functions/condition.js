@@ -1,3 +1,4 @@
+// 解析条件表达式
 function parseCondition(condition) {
 
     const conditions = [];
@@ -42,18 +43,18 @@ function parseCondition(condition) {
 
     return conditions;
 }
-
+//输入属性值和条件原始表达（条件表达式字符串、跳转事件id组成的长度为2的列表），返回true or false
 function checkCondition(property, condition) {
     const conditions = parseCondition(condition);
     return checkParsedConditions(property, conditions);
 }
-
+//处理&和|串联起来的表达式，返回true or false
 function checkParsedConditions(property, conditions) {
     if(!Array.isArray(conditions)) return checkProp(property, conditions);
     if(conditions.length == 0) return true;
     if(conditions.length == 1) return checkParsedConditions(property, conditions[0]);
 
-    let ret = checkParsedConditions(property, conditions[0]);
+    let ret = checkParsedConditions(property, conditions[0]);  // 递归一下
     for(let i=1; i<conditions.length; i+=2) {
         switch(conditions[i]) {
             case '&':
@@ -68,19 +69,19 @@ function checkParsedConditions(property, conditions) {
     }
     return ret;
 }
-
+//输入表达式，返回true or false
 function checkProp(property, condition) {
 
     const length = condition.length;
-    let i = condition.search(/[><\!\?=]/);
+    let i = condition.search(/[><\!\?=]/); //查找运算符位置
 
-    const prop = condition.substring(0,i);
+    const prop = condition.substring(0,i); // [0, i)区间即为变量名
     const symbol = condition.substring(i, i+=(condition[i+1]=='='?2:1));
     const d = condition.substring(i, length);
 
-    const propData = property.get(prop);
+    const propData = property.get(prop);  //获取相应变量的值
     const conditionData = d[0]=='['? JSON.parse(d): Number(d);
-
+    //根据运算符分别判断
     switch(symbol) {
         case '>':  return propData >  conditionData;
         case '<':  return propData <  conditionData;

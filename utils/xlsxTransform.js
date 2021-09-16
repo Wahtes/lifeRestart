@@ -1,3 +1,5 @@
+// 脚本文件utils/xlsxTransform.js用于将xlsx文件转化为json，方便读取。
+
 import { readFile, writeFile, stat, readdir } from 'fs/promises';
 import * as XLSX from 'xlsx';
 import { join, extname, dirname } from 'path';

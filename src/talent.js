@@ -26,7 +26,7 @@ class Talent {
         return checkCondition(property, condition);
     }
 
-    get(talentId) {
+    get(talentId) {  //根据talentId获取对应的talent
         const talent = this.#talents[talentId];
         if(!talent) throw new Error(`[ERROR] No Talent[${talentId}]`);
         return clone(talent);
@@ -47,7 +47,7 @@ class Talent {
         }
         return null;
     }
-
+    // 抽取天赋
     talentRandom(include, {times = 0, achievement = 0} = {}) {
         const rate = { 1:100, 2:10, 3:1, };
         const rateAddition = { 1:1, 2:1, 3:1, };
@@ -105,7 +105,7 @@ class Talent {
         return Number(this.get(talents).status) || 0;
     }
 
-    do(talentId, property) {
+    do(talentId, property) {  //对外（Life类）展示的处理天赋事件的接口
         const { effect, condition, grade, name, description } = this.get(talentId);
         if(condition && !checkCondition(property, condition))
             return null;

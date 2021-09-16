@@ -3,6 +3,7 @@ import Event from './event.js';
 import Talent from './talent.js';
 import Achievement from './achievement.js';
 
+// 4个主要类在各自的文件中实现
 class Life {
     constructor() {
         this.#property = new Property();
@@ -18,6 +19,7 @@ class Life {
     #triggerTalents;
 
     async initial() {
+        // 读取json数据
         const [age, talents, events, achievements] = await Promise.all([
           json('age'),
           json('talents'),
@@ -29,7 +31,7 @@ class Life {
         this.#event.initial({events});
         this.#achievement.initial({achievements});
     }
-
+    // 玩家完成初始数值选择后，进行初始化
     restart(allocation) {
         this.#triggerTalents = {};
         this.#property.restart(allocation);
@@ -50,34 +52,34 @@ class Life {
     }
 
     next() {
-        const {age, event, talent} = this.#property.ageNext();
+        const {age, event, talent} = this.#property.ageNext();  //年龄增长
 
-        const talentContent = this.doTalent(talent);
-        const eventContent = this.doEvent(this.random(event));
+        const talentContent = this.doTalent(talent); //处理天赋中途生效的情况
+        const eventContent = this.doEvent(this.random(event));  //TODO 要看懂
 
         const isEnd = this.#property.isEnd();
-
-        const content = [talentContent, eventContent].flat();
+        //TODO 有点没懂flat的效果，要不输出看看？
+        const content = [talentContent, eventContent].flat(); // 把talentContent, eventContent这两个array合成一个array
         this.#achievement.achieve(
             this.#achievement.Opportunity.TRAJECTORY,
             this.#property
         )
         return { age, content, isEnd };
     }
-
+    // 处理天赋效果 
     doTalent(talents) {
-        if(talents) this.#property.change(this.#property.TYPES.TLT, talents);
+        if(talents) this.#property.change(this.#property.TYPES.TLT, talents);  //中途talent变化
         talents = this.#property.get(this.#property.TYPES.TLT)
             .filter(talentId => this.getTalentCurrentTriggerCount(talentId) < this.#talent.get(talentId).max_triggers);
 
         const contents = [];
-        for(const talentId of talents) {
+        for(const talentId of talents) {  //一个简写的for循环
             const result = this.#talent.do(talentId, this.#property);
             if(!result) continue;
             this.#triggerTalents[talentId] = this.getTalentCurrentTriggerCount(talentId) + 1;
             const { effect, name, description, grade } = result;
             contents.push({
-                type: this.#property.TYPES.TLT,
+                type: this.#property.TYPES.TLT,  //声明属性是天赋（与事件区分）
                 name,
                 grade,
                 description,
@@ -87,7 +89,7 @@ class Life {
         }
         return contents;
     }
-
+    // 发生事件
     doEvent(eventId) {
         const { effect, next, description, postEvent } = this.#event.do(eventId, this.#property);
         this.#property.change(this.#property.TYPES.EVT, eventId);
@@ -97,16 +99,18 @@ class Life {
             description,
             postEvent,
         }
-        if(next) return [content, this.doEvent(next)].flat();
+        //如果有确定要发生的下一事件，在列表中返回
+        if(next) return [content, this.doEvent(next)].flat(); //this.doEvent(next)返回[content]，所以最终返回的是元素为content的列表
         return [content];
     }
-
+    // 在当前限制条件下对事件进行随机 Important
     random(events) {
+        //筛去不合法的事件
         events = events.filter(([eventId])=>this.#event.check(eventId, this.#property));
 
         let totalWeights = 0;
         for(const [, weight] of events)
-            totalWeights += weight;
+            totalWeights += weight; //总权重
 
         let random = Math.random() * totalWeights;
         for(const [eventId, weight] of events)

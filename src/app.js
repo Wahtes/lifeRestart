@@ -2,6 +2,8 @@ import { summary } from './functions/summary.js';
 import { getRate, getGrade } from './functions/addition.js';
 import Life from './life.js';
 
+// 游戏界面的逻辑基本在这个文件
+
 class App{
     constructor(){
         this.#life = new Life();
@@ -51,7 +53,7 @@ class App{
             </div>
         </div>
         `);
-
+        // 开始页面
         // Index
         const indexPage = $(`
         <div id="main">
@@ -69,7 +71,7 @@ class App{
 
         // Init theme
         this.setTheme(localStorage.getItem('theme'))
-
+        // 从手写的indexPage页面中找到id为restart的按钮，绑定函数【切换到talent页面】。此后同理
         indexPage
             .find('#restart')
             .click(()=>this.switch('talent'));
@@ -135,7 +137,7 @@ class App{
         achievementPage
             .find('#rank')
             .click(()=>this.hint('别卷了，没有排行榜'));
-        // Talent
+        // Talent 选择3个天赋
         const talentPage = $(`
         <div id="main">
             <div class="head" style="font-size: 1.6rem">天赋抽卡</div>
@@ -148,7 +150,7 @@ class App{
         const createTalent = ({ grade, name, description }) => {
             return $(`<li class="grade${grade}b">${name}（${description}）</li>`)
         };
-
+        // 包含合法性验证
         talentPage
             .find('#random')
             .click(()=>{
@@ -296,7 +298,8 @@ class App{
         for(const type in groups) {
             ul.append(groups[type].group);
         }
-
+        
+        // 属性初始值分配页面
         propertyPage
             .find('#random')
             .click(()=>{
@@ -345,7 +348,7 @@ class App{
                 // })
             });
 
-        // Trajectory
+        // Trajectory 人生轨迹（主游戏流程页面）
         const trajectoryPage = $(`
         <div id="main">
             <ul id="lifeProperty" class="lifeProperty"></ul>
@@ -366,22 +369,23 @@ class App{
             .find('#lifeTrajectory')
             .click(()=>{
                 if(this.#isEnd) return;
-                const trajectory = this.#life.next();
+                const trajectory = this.#life.next();  // 这句获得来自Life类的数据
                 const { age, content, isEnd } = trajectory;
+                // 创建每一行的显示item（天赋发动或事件）
                 const li = $(`<li><span>${age}岁：</span><span>${
                     content.map(
                         ({type, description, grade, name, postEvent}) => {
-                            switch(type) {
+                            switch(type) {  // 天赋或事件
                                 case 'TLT':
                                     return `天赋【${name}】发动：${description}`;
                                 case 'EVT':
                                     return description + (postEvent?`<br>${postEvent}`:'');
                             }
                         }
-                    ).join('<br>')
+                    ).join('<br>') //把不同content，通过<br>连起来，换行显示
                 }</span></li>`);
-                li.appendTo('#lifeTrajectory');
-                $("#lifeTrajectory").scrollTop($("#lifeTrajectory")[0].scrollHeight);
+                li.appendTo('#lifeTrajectory');  // 加到显示的列表里
+                $("#lifeTrajectory").scrollTop($("#lifeTrajectory")[0].scrollHeight); // 滚动到底部-scrollTop(offset)
                 if(isEnd) {
                     $(document).unbind("keydown");
                     this.#isEnd = true;
@@ -461,7 +465,7 @@ class App{
             .find('#auto2x')
             .click(()=>auto(500));
 
-        // Summary
+        // Summary 人生总结
         const summaryPage = $(`
         <div id="main">
             <div class="head">人生总结</div>
@@ -492,7 +496,8 @@ class App{
                 this.#isEnd = false;
                 this.switch('index');
             });
-
+        
+        //此后是在定义页面函数和操作
         this.#pages = {
             loading: {
                 page: loadingPage,
@@ -742,6 +747,7 @@ class App{
         });
     }
 
+    // 两套主题配色
     setTheme(theme) {
         const themeLink = $(document).find('#themeLink');
 
