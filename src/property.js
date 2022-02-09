@@ -86,7 +86,7 @@ class Property {
             [this.TYPES.LIF]: 1,
 
             [this.TYPES.TLT]: [],
-            [this.TYPES.EVT]: [],
+            [this.TYPES.EVT]: [],  //是列表
 
             [this.TYPES.LAGE]: Infinity,
             [this.TYPES.LCHR]: Infinity,
@@ -236,7 +236,7 @@ class Property {
     }
     // 将属性prop增加value
     change(prop, value) {
-        if(Array.isArray(value)) {
+        if(Array.isArray(value)) { //多个事件一起发生时，value是array，分别处理
             for(const v of value)
                 this.change(prop, Number(v));
             return;
@@ -251,10 +251,11 @@ class Property {
             case this.TYPES.LIF:
                 this.hl(prop, this.#data[prop] += Number(value));
                 return;
+            //important TLT和EVT处理逻辑相同，都是添加
             case this.TYPES.TLT:
             case this.TYPES.EVT:
                 const v = this.#data[prop];
-                if(value<0) {
+                if(value<0) {  //TODO value为什么会小于0
                     const index = v.indexOf(value);
                     if(index!=-1) v.splice(index,1); //在index处删去value
                 }
@@ -334,13 +335,13 @@ class Property {
             )
         )
     }
-
+    //localStorage-get
     lsget(key) {
         const data = localStorage.getItem(key);
         if(data === null) return;
         return JSON.parse(data);
     }
-
+    //localStorage-set
     lsset(key, value) {
         localStorage.setItem(
             key,

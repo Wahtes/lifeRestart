@@ -158,7 +158,7 @@ function transform(rawSheets) {
 
 async function walk(filePath) {
     const xlsxPaths = [];
-    if(Array.isArray(filePath)) {
+    if(Array.isArray(filePath)) { //一系列文件路径
         for(const subPath of filePath)
             xlsxPaths.push(await walk(subPath));
         return xlsxPaths.flat();
@@ -177,10 +177,12 @@ async function walk(filePath) {
 }
 
 async function main() {
+    //array.slice(a,b)返回数组序号[a, b)范围内的元素，b缺省则为[a, +∞)
     const filePaths = process.argv.slice(2);
     if(filePaths.length<0) process.exit(0);
     const xlsxs = await walk(filePaths);
     const sheets = {};
+    //处理每个文件？
     for(const p of xlsxs) {
         const data = await read(p);
         const d = dirname(p);

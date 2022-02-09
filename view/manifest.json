@@ -41,11 +41,11 @@
       "type": "image/png"
     }
   ],
-  "name": "人生重开模拟器",
-  "short_name": "LifeRestart",
+  "name": "深中重开模拟器",
+  "short_name": "SMSRestart",
   "orientation": "portrait",
   "display": "standalone",
   "start_url": "/view/index.html",
-  "description": "人生重开模拟器",
+  "description": "深中重开模拟器",
   "background_color": "#ffffff"
 }

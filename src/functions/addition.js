@@ -1,3 +1,4 @@
+// 获得稀有度
 export function getRate(type, value) {
     switch(type) {
         case 'times':
@@ -17,7 +18,7 @@ export function getRate(type, value) {
         default: return {};
     }
 }
-
+// 获得属性分数评级（人生总结时）
 export function getGrade(type, value) {
     switch(type) {
         case 'times':

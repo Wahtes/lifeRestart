@@ -54,7 +54,7 @@ function checkParsedConditions(property, conditions) {
     if(conditions.length == 0) return true;
     if(conditions.length == 1) return checkParsedConditions(property, conditions[0]);
 
-    let ret = checkParsedConditions(property, conditions[0]);  // 递归一下
+    let ret = checkParsedConditions(property, conditions[0]);  // important 递归一下
     for(let i=1; i<conditions.length; i+=2) {
         switch(conditions[i]) {
             case '&':
@@ -76,11 +76,12 @@ function checkProp(property, condition) {
     let i = condition.search(/[><\!\?=]/); //查找运算符位置
 
     const prop = condition.substring(0,i); // [0, i)区间即为变量名
-    const symbol = condition.substring(i, i+=(condition[i+1]=='='?2:1));
+    const symbol = condition.substring(i, i+=(condition[i+1]=='='?2:1)); //这样可以把!=和<=和>=取到
     const d = condition.substring(i, length);
 
     const propData = property.get(prop);  //获取相应变量的值
     const conditionData = d[0]=='['? JSON.parse(d): Number(d);
+    //TODO 新增功能d[0]是int？可以设置时间间隔
     //根据运算符分别判断
     switch(symbol) {
         case '>':  return propData >  conditionData;
@@ -89,12 +90,12 @@ function checkProp(property, condition) {
         case '<=': return propData <= conditionData;
         case '=':
             if(Array.isArray(propData))
-                return propData.includes(conditionData);
-            return propData == conditionData;
+                return propData.includes(conditionData);  //important 重新定义了元素对数组的"="：表示includes
+            return propData == conditionData;             //也有常规相等
         case '!=':
             if(Array.isArray(propData))
-                return !propData.includes(conditionData);
-            return propData == conditionData;
+                return !propData.includes(conditionData); //同理
+            return propData == conditionData;   //TODO 这里写错了吧
         case '?':
             if(Array.isArray(propData)) {
                 for(const p of propData)

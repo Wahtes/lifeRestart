@@ -14,7 +14,7 @@ class Event {
             // branch是列表，列表中每一项格式如EVT?[10382,20367]:10403
             event.branch = event.branch.map(b=>{ 
                 b = b.split(':');  //在:处分开
-                b[1] = Number(b[1]); //跳转到的事件id改为Number类型
+                b[1] = Number(b[1]); //跳转到的事件id改为Number类型  TODO：改为支持事件序号列表
                 return b;
             });
         }
@@ -26,7 +26,7 @@ class Event {
     //检查合法性，在life中作为filter
     check(eventId, property) {
         const { include, exclude, NoRandom } = this.get(eventId);
-        if(NoRandom) return false;
+        if(NoRandom) return false;  //NoRandom的event不参与随机
         if(exclude && checkCondition(property, exclude)) return false;
         if(include) return checkCondition(property, include);
         return true;
@@ -46,10 +46,10 @@ class Event {
     do(eventId, property) {
         const { effect, branch, event: description, postEvent } = this.get(eventId); //javaScript语法，直接将对象相应属性取出（key相同）
         if(branch) //important如果有分支情况
-            for(const [cond, next] of branch) //依次处理每一分支情况
+            for(const [cond, next] of branch) //依次处理每一分支情况 
                 if(checkCondition(property, cond)) //如果满足所描述的条件
                     return { effect, next, description }; //直接返回对应的事件（不看后面的分支），保存在next。不返回postEvent！
-        return { effect, postEvent, description };
+        return { effect, postEvent, description };   //这里的变量名和接受参数方是一一对应的
     }
 
 }

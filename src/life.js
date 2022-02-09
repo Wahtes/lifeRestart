@@ -55,10 +55,9 @@ class Life {
         const {age, event, talent} = this.#property.ageNext();  //年龄增长
 
         const talentContent = this.doTalent(talent); //处理天赋中途生效的情况
-        const eventContent = this.doEvent(this.random(event));  //TODO 要看懂
+        const eventContent = this.doEvent(this.random(event));  //TODO 若为列表，对每个都做doEvent
 
         const isEnd = this.#property.isEnd();
-        //TODO 有点没懂flat的效果，要不输出看看？
         const content = [talentContent, eventContent].flat(); // 把talentContent, eventContent这两个array合成一个array
         this.#achievement.achieve(
             this.#achievement.Opportunity.TRAJECTORY,
@@ -91,7 +90,7 @@ class Life {
     }
     // 发生事件
     doEvent(eventId) {
-        const { effect, next, description, postEvent } = this.#event.do(eventId, this.#property);
+        const { effect, next, description, postEvent } = this.#event.do(eventId, this.#property); //next和postEvent只有一个有，next就是个id！
         this.#property.change(this.#property.TYPES.EVT, eventId);
         this.#property.effect(effect);
         const content = {
@@ -100,7 +99,7 @@ class Life {
             postEvent,
         }
         //如果有确定要发生的下一事件，在列表中返回
-        if(next) return [content, this.doEvent(next)].flat(); //this.doEvent(next)返回[content]，所以最终返回的是元素为content的列表
+        if(next) return [content, this.doEvent(next)].flat(); //this.doEvent(next)返回[content]，所以最终返回的是元素为content的列表。important：递归doEvent
         return [content];
     }
     // 在当前限制条件下对事件进行随机 Important
@@ -116,9 +115,9 @@ class Life {
         for(const [eventId, weight] of events)
             if((random-=weight)<0)
                 return eventId;
-        return events[events.length-1];
+        return events[events.length-1]; //返回列表最后一个event
     }
-
+    //一个壳 去看talent.talentRando
     talentRandom() {
         const times = this.#property.get(this.#property.TYPES.TMS);
         const achievement = this.#property.get(this.#property.TYPES.CACHV);
@@ -128,7 +127,7 @@ class Life {
     talentExtend(talentId) {
         this.#property.set(this.#property.TYPES.EXT, talentId);
     }
-
+    //从property获得上一局留的talent
     getLastExtendTalent() {
         return this.#property.get(this.#property.TYPES.EXT);
     }

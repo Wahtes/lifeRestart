@@ -47,9 +47,9 @@ class Talent {
         }
         return null;
     }
-    // 抽取天赋
+    // important 抽取天赋
     talentRandom(include, {times = 0, achievement = 0} = {}) {
-        const rate = { 1:100, 2:10, 3:1, };
+        const rate = { 1:100, 2:10, 3:1, }; //三种等级概率，单位为千分之一（‰）
         const rateAddition = { 1:1, 2:1, 3:1, };
         const timesRate = getRate('times', times);
         const achievementRate = getRate('achievement', achievement);
@@ -60,11 +60,11 @@ class Talent {
         for(const grade in achievementRate)
             rateAddition[grade] += achievementRate[grade] - 1;
 
-        for(const grade in rateAddition)
+        for(const grade in rateAddition) //乘以对应的rateAddition
             rate[grade] *= rateAddition[grade];
 
-        const randomGrade = () => {
-            let randomNumber = Math.floor(Math.random() * 1000);
+        const randomGrade = () => { 
+            let randomNumber = Math.floor(Math.random() * 1000);//和random() * 1000比大小
             if((randomNumber -= rate[3]) < 0) return 3;
             if((randomNumber -= rate[2]) < 0) return 2;
             if((randomNumber -= rate[1]) < 0) return 1;
@@ -73,7 +73,7 @@ class Talent {
 
         // 1000, 100, 10, 1
         const talentList = {};
-        for(const talentId in this.#talents) {
+        for(const talentId in this.#talents) {  //遍历所有天赋，按grade填到talentList里去
             const { id, grade, name, description } = this.#talents[talentId];
             if(id == include) {
                 include = { grade, name, description, id };
@@ -85,12 +85,13 @@ class Talent {
 
         return new Array(10)
             .fill(1).map((v, i)=>{
-                if(!i && include) return include;
+                //看上去会执行10遍，直到填充完
+                if(!i && include) return include;  //先填上局留下的
                 let grade = randomGrade();
-                while(talentList[grade].length == 0) grade--;
+                while(talentList[grade].length == 0) grade--;  //如果这个稀有度的用完了，那就选次稀有的，直到长度不为0
                 const length = talentList[grade].length;
-
-                const random = Math.floor(Math.random()*length) % length;
+                //在talentList[grade]中随机取一个
+                const random = Math.floor(Math.random()*length) % length; 
                 return talentList[grade].splice(random,1)[0];
             });
     }
